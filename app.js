@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const users = require('./routes/user');
 const cards = require('./routes/card');
+const pageNotFound = require('./routes/user');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 
 app.use('/cards', cards);
 app.use('/users', users);
+app.use('/404', pageNotFound);
 
 app.listen(PORT, () => {
   console.log('Сервер запущен');

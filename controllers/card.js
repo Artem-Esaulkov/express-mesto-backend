@@ -50,7 +50,12 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (card) {
+        return res.send({ card });
+      }
+      return res.status(404).send({ message: 'Карточка не найдена' });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
@@ -64,7 +69,12 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (card) {
+        return res.send({ card });
+      }
+      return res.status(404).send({ message: 'Карточка не найдена' });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
