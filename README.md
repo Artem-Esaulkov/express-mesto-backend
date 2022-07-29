@@ -27,4 +27,4 @@
 `npm run start` — запускает сервер   
 `npm run dev` — запускает сервер с hot-reload
 
-[Ссылка на репозиторий](https://artem-esaulkov.github.io/express-mesto-backend/)
+[Ссылка на репозиторий проекта](https://artem-esaulkov.github.io/express-mesto-backend/)

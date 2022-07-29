@@ -1,12 +1,17 @@
 const Card = require('../models/card');
-const errorCallback = require('../error');
+
+const ERR_CODE = 400;
 
 module.exports.createCard = (req, res) => {
   const owner = req.user._id;
   const { name, link } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ data: card }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.getCards = (req, res) => {
@@ -17,7 +22,11 @@ module.exports.getCards = (req, res) => {
       }
       return res.status(404).send({ message: 'Карточки не найдены' });
     })
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -28,7 +37,11 @@ module.exports.deleteCard = (req, res) => {
       }
       return res.status(404).send({ message: 'Карточка не найдена' });
     })
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -38,7 +51,11 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -48,5 +65,9 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };

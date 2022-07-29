@@ -1,11 +1,16 @@
 const User = require('../models/user');
-const errorCallback = require('../error');
+
+const ERR_CODE = 400;
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send({ data: user }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.getUsers = (req, res) => {
@@ -16,7 +21,11 @@ module.exports.getUsers = (req, res) => {
       }
       return res.status(404).send({ message: 'Пользователи не найдены' });
     })
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.getUserId = (req, res) => {
@@ -27,7 +36,11 @@ module.exports.getUserId = (req, res) => {
       }
       return res.status(404).send({ message: 'Пользователь не найден' });
     })
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 const updateParams = {
@@ -43,7 +56,11 @@ module.exports.updateUserProfile = (req, res) => {
     updateParams,
   )
     .then((user) => res.send({ data: user }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -53,5 +70,9 @@ module.exports.updateUserAvatar = (req, res) => {
     updateParams,
   )
     .then((user) => res.send({ data: user }))
-    .catch(errorCallback);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(ERR_CODE).send({ message: 'Данные некорректны' });
+      } return res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
