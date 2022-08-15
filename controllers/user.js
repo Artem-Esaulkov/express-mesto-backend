@@ -6,9 +6,13 @@ const NotFoundError = require('../errors/not-found-err');
 const AuthorizationError = require('../errors/auth-err');
 const User = require('../models/user');
 
+function parseError(res, err) {
+  return res.status(err.statusCode).send({ message: err.message });
+}
+
 const message = 'Произошла ошибка сервера';
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -28,16 +32,16 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return next(new BadRequestError('Переданы некорректные данные пользователя'));
+        return parseError(res, new BadRequestError('Переданы некорректные данные пользователя'));
       }
       if (err.code === 11000) {
-        return next(new ConflictError('Такой пользователь уже есть в базе данных'));
+        return parseError(res, new ConflictError('Такой пользователь уже есть в базе данных'));
       }
-      return next(res.status(500).send({ message }));
+      return res.status(500).send({ message });
     });
 };
 
-module.exports.getUsers = (req, res, next) => {
+module.exports.getUsers = (req, res) => {
   User.find({})
     .then((user) => {
       if (user.length > 0) {
@@ -45,27 +49,27 @@ module.exports.getUsers = (req, res, next) => {
           data: user,
         });
       }
-      return next(new NotFoundError('Пользователи не найдены'));
+      return parseError(res, new NotFoundError('Пользователи не найдены'));
     })
-    .catch(() => next(res.status(500).send({ message })));
+    .catch(() => res.status(500).send({ message }));
 };
 
-module.exports.getUserId = (req, res, next) => {
+module.exports.getUserId = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         return res.send({ user });
       }
-      return next(new NotFoundError('Пользователь не найден'));
+      return parseError(res, new NotFoundError('Пользователи не найдены'));
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return next(new BadRequestError('Переданы некорректные данные пользователя'));
+        return parseError(res, new BadRequestError('Переданы некорректные данные пользователя'));
       } return res.status(500).send({ message });
     });
 };
 
-module.exports.getCurrentUser = (req, res, next) => {
+module.exports.getCurrentUser = (req, res) => {
   User.findById(req.user._id)
     .then((user) => res.send({
       name: user.name,
@@ -73,7 +77,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       avatar: user.avatar,
       email: user.email,
     }))
-    .catch(() => next(res.status(500).send({ message })));
+    .catch(() => res.status(500).send({ message }));
 };
 
 const updateParams = {
@@ -81,7 +85,7 @@ const updateParams = {
   runValidators: true,
 };
 
-module.exports.updateUserProfile = (req, res, next) => {
+module.exports.updateUserProfile = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, about: req.body.about },
@@ -90,12 +94,12 @@ module.exports.updateUserProfile = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return next(new BadRequestError('Переданы некорректные данные пользователя'));
+        return parseError(res, new BadRequestError('Переданы некорректные данные пользователя'));
       } return res.status(500).send({ message });
     });
 };
 
-module.exports.updateUserAvatar = (req, res, next) => {
+module.exports.updateUserAvatar = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
@@ -104,17 +108,17 @@ module.exports.updateUserAvatar = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return next(new BadRequestError('Переданы некорректные данные пользователя'));
+        return parseError(res, new BadRequestError('Переданы некорректные данные пользователя'));
       } return res.status(500).send({ message });
     });
 };
 
-module.exports.login = (req, res, next) => {
+module.exports.login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch(() => next(new AuthorizationError('Неправильные почта или пароль')));
+    .catch(() => parseError(res, new AuthorizationError('Неправильные почта или пароль')));
 };

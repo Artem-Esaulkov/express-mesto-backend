@@ -35,7 +35,9 @@ app.post('/signup', celebrate({
 }), createUser);
 
 app.use('*', (req, res, next) => {
-  next(new NotFoundError('Данной страницы не существует'));
+  const err = new NotFoundError('Данной страницы не существует');
+  res.status(err.statusCode).send({ message: err.message });
+  next();
 });
 
 app.use(errors());
